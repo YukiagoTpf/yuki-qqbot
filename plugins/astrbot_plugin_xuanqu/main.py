@@ -683,6 +683,7 @@ class XuanquPlugin(Star):
             show = row.get("kind") == "辩解" or row.get("verdict") in ("采信", "部分采信")
         else:
             show = row.get("action") in ("mute", "admin") or int(row.get("score") or 0) >= DOSSIER_MIN
+            show = show and row.get("kind") != "大餐"  # 2026-11-07 起单纯晒吃的不算炫，以前按大餐记的不当前科
         key = f"appeal-{t}" if appeal else str(row.get("mid") or row.get("text") or t)
         book[key] = {"t": t, "mid": str(row.get("mid") or ""), "appeal": appeal, "show": show, "line": dossier_line(row)}
         for k in [k for k, e in book.items() if t - e["t"] > DOSSIER_HOURS * 3600]:
