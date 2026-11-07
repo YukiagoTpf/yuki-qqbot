@@ -1,0 +1,9 @@
+name: astrbot_plugin_groupkb
+display_name: 群知识库
+desc: 把群聊记到本地，每天凌晨让 LLM 读一遍前一天的聊天，把群友外号、群里的黑话和值得留档的事记进按群的知识库（groups.yaml），给别的插件用。
+version: 0.1.0
+author: yukiago
+repo: https://github.com/YukiagoTpf/yuki-qqbot
+support_platforms:
+  - aiocqhttp
+astrbot_version: ">=4.29"

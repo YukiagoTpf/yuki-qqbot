@@ -9,6 +9,7 @@
 | [猜题](https://github.com/YukiagoTpf/astrbot_plugin_guessless)（`plugins/astrbot_plugin_guessless`，子模块） | 九宫格看图猜游戏、动画、宝可梦、机体，看街景猜国家，听 OP 猜番，看 K 线猜涨跌，盲猜宝可梦、国家、城市……按群记排行，每小时限量。不需要 LLM |
 | [杀炫区](plugins/astrbot_plugin_xuanqu) | 旁听群聊，用 LLM 认出炫耀恋爱、收入的发言（包括聊天记录截图、一天里的暗炫），禁言并损一句；群友可以 @bot 举证、喊冤 |
 | [搜烧鸡](plugins/astrbot_plugin_xsearch) | 回复一张图 @bot，先以图搜图，再让本机的 Grok 去 X 上核实，找图的出处 |
+| [群知识库](plugins/astrbot_plugin_groupkb) | 把群聊记到本地，每天凌晨让 LLM 读一遍前一天的聊天，把群友外号、群里的黑话和值得留档的事记进按群的知识库，给别的插件用 |
 | [提issue](plugins/astrbot_plugin_issue) | 群友 @bot 提意见、报 bug，整理成猜题仓库的 issue；bot 管理员说「清issue」，本机开个 Claude Code 去处理 |
 
 用法和设计见各插件目录的 README。
@@ -55,7 +56,7 @@ make hooks             # 提交前自动跑 check-public，见下文「提交」
   - `make groups` 查群号（走 NapCat 调试接口，不依赖 AstrBot）。同名群很多，按群号认。
   - 手改 `cmd_config.json` 要先 `docker compose stop astrbot`，改完再起，避免运行中被覆盖。文件是 UTF-8 BOM。
 - **各插件开在哪些群**：每个插件配置里的 `groups`（WebUI 插件页，即 `data/astrbot/config/<插件>_config.json`）。猜题的每小时题数、宵禁、帮助里追加的别的插件用法也按群配。
-- **按群的知识库**：`data/astrbot/groups.yaml`，模板是 `groups.example.yaml`。记这个群的黑话、规矩，群友除了群名片以外的外号。改了不用重启。现在杀炫区在用：黑话交给判定的模型，外号用来认出打字里提到的是谁（别人的外号不会被当成说话的人自己）。
+- **按群的知识库**：`data/astrbot/groups.yaml`，模板是 `groups.example.yaml`。记这个群的黑话、规矩，群友除了群名片以外的外号，还有每天值得留档的事。群知识库插件每天凌晨自动往里加，只加不删；手改也行，改了不用重启。现在杀炫区在用：黑话交给判定的模型，外号用来认出打字里提到的是谁（别人的外号不会被当成说话的人自己）。
 
 ## 写插件
 

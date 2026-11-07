@@ -15,7 +15,8 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - `data/astrbot/cmd_config.json`：AstrBot 主配置，群白名单在 `platform_settings.id_whitelist`，管理员在 `admins_id`。
   - `data/astrbot/config/astrbot_plugin_guessless_config.json`：猜题插件配置，含 Google Maps key 和 IGDB secret。按群的每小时题数在 `group_hourly_limits`（「群号:题数」，0 不限）。
   - `data/astrbot/plugin_data/astrbot_plugin_guessless/`：题库、缓存、`rounds.json`（进行中的题）、`quota.json`、`scores.json`、`paused.json`。
-  - `data/astrbot/groups.yaml`：按群的知识库（黑话、群友外号），杀炫区在用，改了不用重启。模板是仓库根目录的 `groups.example.yaml`。
+  - `data/astrbot/groups.yaml`：按群的知识库（黑话、群友外号、每天的留档），群知识库插件每天凌晨往里加，杀炫区在用，改了不用重启。模板是仓库根目录的 `groups.example.yaml`。
+  - `data/astrbot/plugin_data/astrbot_plugin_groupkb/chat/<群号>/<日期>.jsonl`：落盘的群聊（留 14 天），查「当时群里在说什么」、做测试样本用它，比 NapCat 的历史全。
   - 两个配置文件都是 UTF-8 BOM，改的时候保留 BOM；里面有密钥，只读取需要的字段，不要打印整个文件。
 
 ## 常用命令

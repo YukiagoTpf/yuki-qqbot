@@ -1,0 +1,38 @@
+{
+  "groups": {
+    "description": "生效的群号",
+    "type": "list",
+    "default": [],
+    "hint": "只记这些群的聊天、整理这些群的知识库"
+  },
+  "provider": {
+    "description": "整理用的模型",
+    "type": "string",
+    "default": "",
+    "_special": "select_provider",
+    "hint": "建议开思考的那个；一天的聊天分几段送过去"
+  },
+  "run_at": {
+    "description": "每天几点整理前一天的",
+    "type": "string",
+    "default": "04:00",
+    "hint": "HH:MM。这个点电脑在睡觉的话，醒了再补，最多补 3 天"
+  },
+  "keep_days": {
+    "description": "聊天记录留几天",
+    "type": "int",
+    "default": 14,
+    "hint": "记在插件数据目录的 chat/<群号>/<日期>.jsonl，过期的删掉"
+  },
+  "events_per_day": {
+    "description": "每天最多留档几件事",
+    "type": "int",
+    "default": 5
+  },
+  "max_notes": {
+    "description": "黑话、梗最多记几条",
+    "type": "int",
+    "default": 20,
+    "hint": "杀炫区判定时会把这些交给模型，太多会喧宾夺主。满了就不再加，手动删了才会补"
+  }
+}
