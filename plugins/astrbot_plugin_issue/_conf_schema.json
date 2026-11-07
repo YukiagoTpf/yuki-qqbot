@@ -1,0 +1,33 @@
+{
+  "groups": {
+    "description": "生效的群号",
+    "type": "list",
+    "default": [],
+    "hint": "只在这些群里响应；空列表就哪个群都不管"
+  },
+  "provider": {
+    "description": "整理 issue 用的模型",
+    "type": "string",
+    "default": "",
+    "_special": "select_provider",
+    "hint": "判断是不是猜题的意见、查重、写标题和正文"
+  },
+  "daily_limit": {
+    "description": "每人每天能提几次",
+    "type": "int",
+    "default": 3,
+    "hint": "0 不限。模型判完了才算次数（不管提没提成 issue），出错不算。群主、群管理员、AstrBot 管理员不限，提了也不算"
+  },
+  "bridge_url": {
+    "description": "gh 桥的地址",
+    "type": "string",
+    "default": "http://192.168.5.2:6191",
+    "hint": "宿主机上的 scripts/gh-bridge.py。Colima 里经 192.168.5.2 访问宿主机；host.docker.internal 会被 Clash 劫持"
+  },
+  "claude_bridge_url": {
+    "description": "Claude 桥的地址",
+    "type": "string",
+    "default": "http://192.168.5.2:6192",
+    "hint": "宿主机上的 scripts/claude-bridge.py：bot 管理员说「清issue」时在 herdr 里开个 Claude 处理 open 的 issue"
+  }
+}

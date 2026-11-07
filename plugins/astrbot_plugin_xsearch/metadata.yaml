@@ -1,0 +1,9 @@
+name: astrbot_plugin_xsearch
+display_name: 搜烧鸡
+desc: 回复一张图 @bot 说「搜烧鸡」，先用 Google Lens（SerpApi）和 Yandex 以图搜图，再让本机的 Grok 去 X 上核实，找这张图的出处（原帖或发图的账号）。一个群每小时一次。
+version: 0.2.0
+author: yukiago
+repo: https://github.com/YukiagoTpf/yuki-qqbot
+support_platforms:
+  - aiocqhttp
+astrbot_version: ">=4.29"

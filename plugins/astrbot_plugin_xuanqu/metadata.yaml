@@ -1,0 +1,9 @@
+name: astrbot_plugin_xuanqu
+display_name: 杀炫区
+desc: 旁听群聊，用 LLM 识别炫耀恋爱、对象、前任、礼物、高收入的发言（含聊天记录截图），判定为炫区就禁言。
+version: 0.1.0
+author: yukiago
+repo: https://github.com/YukiagoTpf/yuki-qqbot
+support_platforms:
+  - aiocqhttp
+astrbot_version: ">=4.29"

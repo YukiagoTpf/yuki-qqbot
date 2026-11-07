@@ -1,0 +1,3 @@
+[submodule "plugins/astrbot_plugin_guessless"]
+	path = plugins/astrbot_plugin_guessless
+	url = https://github.com/YukiagoTpf/astrbot_plugin_guessless.git

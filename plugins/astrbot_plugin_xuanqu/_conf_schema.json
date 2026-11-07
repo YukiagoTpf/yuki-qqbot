@@ -1,0 +1,83 @@
+{
+  "groups": {
+    "description": "生效的群号",
+    "type": "list",
+    "default": [],
+    "hint": "只在这些群里旁听和杀炫区；空列表就哪个群都不管"
+  },
+  "judge_provider": {
+    "description": "判定用的模型",
+    "type": "string",
+    "default": "",
+    "_special": "select_provider"
+  },
+  "vision_provider": {
+    "description": "看图用的模型",
+    "type": "string",
+    "default": "",
+    "_special": "select_provider",
+    "hint": "要能看图；留空用判定的模型"
+  },
+  "vision": {
+    "description": "看图",
+    "type": "bool",
+    "default": true,
+    "hint": "群里的图（动画表情、动图除外）先让模型说是什么，聊天记录截图要靠它"
+  },
+  "threshold": {
+    "description": "禁言分数线（0–100）",
+    "type": "int",
+    "default": 90,
+    "hint": "没人喊杀、或者只有一个群友喊（哪怕 @bot）时用；模型给 50 分以上的都会记进 verdicts.jsonl"
+  },
+  "admin_threshold": {
+    "description": "管理员喊杀时的分数线",
+    "type": "int",
+    "default": 75,
+    "hint": "群主、群管理员、AstrBot 管理员喊杀（@bot、引用、直接说「杀」都算）时从这个分数起算"
+  },
+  "crowd_step": {
+    "description": "每多一个人喊杀，分数线降几分",
+    "type": "int",
+    "default": 5,
+    "hint": "5 分钟内喊杀、叫管理的人按人头算（被判的人自己辩解不算），第一个人不降。默认：2 人 85、3 人 80、4 人 75；管理员 75、管理员再加 1 人 70"
+  },
+  "min_threshold": {
+    "description": "分数线最低降到多少",
+    "type": "int",
+    "default": 70
+  },
+  "mute_minutes": {
+    "description": "禁言多少分钟",
+    "type": "int",
+    "default": 10
+  },
+  "batch_size": {
+    "description": "攒多少条判一次",
+    "type": "int",
+    "default": 20
+  },
+  "lag_seconds": {
+    "description": "消息发出后至少等多少秒再判",
+    "type": "int",
+    "default": 60,
+    "hint": "留出时间把后面群友的反应（民愤）一起带上"
+  },
+  "max_wait_seconds": {
+    "description": "攒不满一批时最多再等多少秒",
+    "type": "int",
+    "default": 60
+  },
+  "crowd_calls": {
+    "description": "几个人喊杀就立刻审",
+    "type": "int",
+    "default": 2,
+    "hint": "5 分钟内这么多个不同的人喊「杀」「🔪」「炫区」就立刻审最近的消息；@bot 喊杀或申诉、引用某条喊杀、说「管理呢」「绿帽呢」不用凑人数。立刻审只是审得快，分数线还是按上面几项算"
+  },
+  "dry_run": {
+    "description": "只记录不动手",
+    "type": "bool",
+    "default": false,
+    "hint": "打开后只把判定写进日志和 verdicts.jsonl，不禁言、不发通知"
+  }
+}

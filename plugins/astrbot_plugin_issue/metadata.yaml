@@ -1,0 +1,9 @@
+name: astrbot_plugin_issue
+display_name: 提issue
+desc: 群友 @bot 说「提issue」加上意见或者 bug，让 DeepSeek 整理成 GitHub issue，经本机的 gh 提到猜题插件的仓库。每人每天 3 次。bot 管理员说「清issue」开个 Claude 把 open 的 issue 处理完。
+version: 0.2.0
+author: yukiago
+repo: https://github.com/YukiagoTpf/yuki-qqbot
+support_platforms:
+  - aiocqhttp
+astrbot_version: ">=4.29"

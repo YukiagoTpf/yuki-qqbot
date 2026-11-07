@@ -1,0 +1,11 @@
+# 本机的东西：密钥、登录态、线上数据、备份
+.env
+data/
+backups/
+.claude/
+
+__pycache__/
+*.pyc
+.ruff_cache/
+*.tmp
+.DS_Store

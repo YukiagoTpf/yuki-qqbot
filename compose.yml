@@ -1,0 +1,57 @@
+name: "astrbot-napcat"
+
+services:
+  napcat:
+    # 固定版本：新版 NapCat / QQ 被踢下线的报告更多（NapCatQQ#1728），make update 不该顺手把它升上去。
+    # 升级时改这里的标签再 make up。
+    image: "mlikiowa/napcat-docker:v4.18.41"
+    container_name: "napcat"
+    # 主机名和 MAC 固定成第一次登录时的值：容器重建默认会换新的，QQ 可能当成换了设备。值在 .env 里。
+    hostname: "${NAPCAT_HOSTNAME:?set NAPCAT_HOSTNAME}"
+    restart: "unless-stopped"
+    environment:
+      # 容器内 napcat 用户映射成宿主机用户，data/napcat 下的文件才归你所有。
+      - "NAPCAT_UID=${NAPCAT_UID:?set NAPCAT_UID}"
+      - "NAPCAT_GID=${NAPCAT_GID:?set NAPCAT_GID}"
+      # 只在 data/napcat/config/onebot11.json 不存在时生效：生成反向 WS 连 ws://astrbot:6199/ws 的默认配置。
+      - "MODE=astrbot"
+      # 只在 data/napcat/config/webui.json 不存在时写入；之后改 .env 不会生效，要改 webui.json。
+      - "WEBUI_TOKEN=${NAPCAT_WEBUI_TOKEN:?set NAPCAT_WEBUI_TOKEN}"
+      # 设了就用 data/napcat/qq 里保存的登录态快速登录，重启不用重新扫码；登录态失效时仍会出二维码。
+      - "ACCOUNT=${NAPCAT_ACCOUNT:-}"
+      - "TZ=Asia/Shanghai"
+    volumes:
+      - "./data/napcat/qq:/app/.config/QQ"
+      - "./data/napcat/config:/app/napcat/config"
+      # AstrBot 发图片/语音时给的是它自己容器里的路径，两边挂到同一路径 NapCat 才读得到。
+      - "./data/astrbot:/AstrBot/data"
+    ports:
+      - "127.0.0.1:${NAPCAT_WEBUI_PORT:-6099}:6099"
+    networks:
+      bot:
+        mac_address: "${NAPCAT_MAC:?set NAPCAT_MAC}"
+    mem_limit: "1g"
+
+  astrbot:
+    image: "soulter/astrbot:latest"
+    container_name: "astrbot"
+    restart: "unless-stopped"
+    security_opt:
+      - "no-new-privileges:true"
+    environment:
+      - "TZ=Asia/Shanghai"
+      - "ASTRBOT_RELOAD=${ASTRBOT_RELOAD:-0}"
+      # Colima 没开 mountInotify，宿主机改文件容器里收不到 inotify，热重载只能轮询。
+      - "WATCHFILES_FORCE_POLLING=true"
+    volumes:
+      - "./data/astrbot:/AstrBot/data"
+      # 自研插件。scripts/link-plugins.sh 在 data/astrbot/plugins 下建指向这里的软链。
+      - "./plugins:/AstrBot/local-plugins"
+    ports:
+      - "127.0.0.1:${ASTRBOT_WEBUI_PORT:-6185}:6185"
+    networks:
+      - "bot"
+    mem_limit: "1g"
+
+networks:
+  bot: {}

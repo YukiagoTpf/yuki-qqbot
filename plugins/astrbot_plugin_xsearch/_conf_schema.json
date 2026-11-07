@@ -1,0 +1,45 @@
+{
+  "groups": {
+    "description": "生效的群号",
+    "type": "list",
+    "default": [],
+    "hint": "只在这些群里响应；空列表就哪个群都不管"
+  },
+  "trigger": {
+    "description": "触发词",
+    "type": "string",
+    "default": "搜烧鸡",
+    "hint": "@bot 说的话里带这个词（12 字以内）就搜"
+  },
+  "cooldown_minutes": {
+    "description": "一个群多久能搜一次（分钟）",
+    "type": "int",
+    "default": 60,
+    "hint": "从喊搜的时间算；没搜成（出错、图下不下来）不算次数。群主、群管理员、AstrBot 管理员不限，搜了也不算次数"
+  },
+  "serpapi_key": {
+    "description": "SerpApi 的 API key（用 Google Lens）",
+    "type": "string",
+    "default": "",
+    "secret": true,
+    "hint": "serpapi.com 注册后在 Dashboard 拿。留空就不用 Google Lens。免费版每月 250 次，每搜一张扣一次，没结果、出错不扣"
+  },
+  "yandex": {
+    "description": "用 Yandex 搜图",
+    "type": "bool",
+    "default": true,
+    "hint": "免费，不要 key。真人照片找到的多是长得像的，只挑社交平台的页面给 grok 当线索"
+  },
+  "bridge_url": {
+    "description": "grok 桥的地址",
+    "type": "string",
+    "default": "http://192.168.5.2:6190",
+    "hint": "宿主机上的 scripts/grok-bridge.py。Colima 里经 192.168.5.2 访问宿主机；host.docker.internal 会被 Clash 劫持"
+  },
+  "timeout_seconds": {
+    "description": "等 grok 最多多少秒",
+    "type": "int",
+    "default": 240,
+    "hint": "grok 桥自己 180 秒超时，这里要比它长"
+  }
+}
