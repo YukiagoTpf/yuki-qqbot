@@ -4,6 +4,7 @@ WATCHDOG := $(HOME)/Library/LaunchAgents/local.astrbot-napcat.watchdog.plist
 GROK_BRIDGE := $(HOME)/Library/LaunchAgents/local.astrbot-napcat.grok-bridge.plist
 GH_BRIDGE := $(HOME)/Library/LaunchAgents/local.astrbot-napcat.gh-bridge.plist
 CLAUDE_BRIDGE := $(HOME)/Library/LaunchAgents/local.astrbot-napcat.claude-bridge.plist
+BUTLER_BRIDGE := $(HOME)/Library/LaunchAgents/local.astrbot-napcat.butler-bridge.plist
 
 help: ## 列出命令
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk 'BEGIN{FS=":.*## "}{printf "  \033[36m%-11s\033[0m %s\n",$$1,$$2}'
@@ -99,4 +100,14 @@ claude-bridge-uninstall: ## 卸掉 Claude 桥
 	-launchctl bootout gui/$$(id -u) $(CLAUDE_BRIDGE)
 	rm -f $(CLAUDE_BRIDGE)
 
-.PHONY: help up down restart logs ps stats qr groups link new-plugin update backup check-public hooks bump-guessless watchdog-install watchdog-uninstall grok-bridge-install grok-bridge-uninstall gh-bridge-install gh-bridge-uninstall claude-bridge-install claude-bridge-uninstall
+butler-bridge-install: ## 装女仆桥：launchd 常驻，管理员说「女仆 …」时交给 herdr 里用 DeepSeek 跑的女仆
+	@mkdir -p data/butler-bridge
+	@sed "s|__ROOT__|$(CURDIR)|g" scripts/butler-bridge.plist > $(BUTLER_BRIDGE)
+	@launchctl bootout gui/$$(id -u) $(BUTLER_BRIDGE) 2>/dev/null || true
+	launchctl bootstrap gui/$$(id -u) $(BUTLER_BRIDGE)
+
+butler-bridge-uninstall: ## 卸掉女仆桥
+	-launchctl bootout gui/$$(id -u) $(BUTLER_BRIDGE)
+	rm -f $(BUTLER_BRIDGE)
+
+.PHONY: help up down restart logs ps stats qr groups link new-plugin update backup check-public hooks bump-guessless watchdog-install watchdog-uninstall grok-bridge-install grok-bridge-uninstall gh-bridge-install gh-bridge-uninstall claude-bridge-install claude-bridge-uninstall butler-bridge-install butler-bridge-uninstall

@@ -1,0 +1,8 @@
+{
+  "bridge_url": {
+    "description": "女仆桥的地址",
+    "type": "string",
+    "default": "http://192.168.5.2:6193",
+    "hint": "宿主机上的 scripts/butler-bridge.py。Colima 里经 192.168.5.2 访问宿主机；host.docker.internal 会被 Clash 劫持"
+  }
+}

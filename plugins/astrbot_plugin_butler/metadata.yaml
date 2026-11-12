@@ -1,0 +1,9 @@
+name: astrbot_plugin_butler
+display_name: 女仆
+desc: bot 管理员 @bot 说「女仆 …」，交给本机 herdr 里用 DeepSeek 跑的女仆（Claude Code）去办：查本机、操作 GitHub、委派 claude / codex / cursor / grok 干活，办完自己回到群里。高危操作先在群里问管理员。
+version: 0.1.0
+author: yukiago
+repo: https://github.com/YukiagoTpf/yuki-qqbot
+support_platforms:
+  - aiocqhttp
+astrbot_version: ">=4.29"

@@ -36,19 +36,23 @@ def post(path, body, cred=None):
     return resp["data"]
 
 
+def call(action, params=None):
+    """登录 WebUI、调一次 action、关掉调试适配器，返回 data。scripts/qq-say.py 也用它。"""
+    token_hash = hashlib.sha256((env("NAPCAT_WEBUI_TOKEN") + ".napcat").encode()).hexdigest()
+    cred = post("/auth/login", {"hash": token_hash})["Credential"]
+    try:
+        result = post("/Debug/call", {"action": action, "params": params or {}}, cred)
+    finally:
+        post("/Debug/close/debug-primary", {}, cred)
+    return result.get("data", result)
+
+
 def main():
     if len(sys.argv) < 2:
         sys.exit(__doc__.strip())
     action = sys.argv[1]
     params = json.loads(sys.argv[2]) if len(sys.argv) > 2 else {}
-
-    token_hash = hashlib.sha256((env("NAPCAT_WEBUI_TOKEN") + ".napcat").encode()).hexdigest()
-    cred = post("/auth/login", {"hash": token_hash})["Credential"]
-    try:
-        result = post("/Debug/call", {"action": action, "params": params}, cred)
-    finally:
-        post("/Debug/close/debug-primary", {}, cred)
-    print(json.dumps(result.get("data", result), ensure_ascii=False, indent=2))
+    print(json.dumps(call(action, params), ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":

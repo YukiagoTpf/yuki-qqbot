@@ -1,0 +1,13 @@
+# 只放开发工具的配置。插件由 AstrBot 按 metadata.yaml 加载，运行依赖见 requirements.txt。
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+
+[tool.ruff.lint]
+# E501 不查：中文按双宽计，注释和文档串很容易超
+select = ["E4", "E7", "E9", "F", "W", "I", "UP", "B", "SIM"]
+ignore = ["B905"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["astrbot"]

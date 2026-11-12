@@ -11,6 +11,7 @@
 | [搜烧鸡](plugins/astrbot_plugin_xsearch) | 回复一张图 @bot，先以图搜图，再让本机的 Grok 去 X 上核实，找图的出处 |
 | [群知识库](plugins/astrbot_plugin_groupkb) | 把群聊记到本地，每天凌晨让 LLM 读一遍前一天的聊天，把群友外号、群里的黑话和值得留档的事记进按群的知识库，给别的插件用 |
 | [提issue](plugins/astrbot_plugin_issue) | 群友 @bot 提意见、报 bug，整理成猜题仓库的 issue；bot 管理员说「清issue」，本机开个 Claude Code 去处理 |
+| [女仆](plugins/astrbot_plugin_butler) | bot 管理员 @bot 说「女仆 …」，交给本机 herdr 里用 DeepSeek 跑的女仆去办：查本机、操作 GitHub、委派 claude / codex / cursor / grok，办完回到群里 |
 
 用法和设计见各插件目录的 README。
 
@@ -20,7 +21,7 @@ compose.yml          NapCat、AstrBot 两个服务；端口只绑 127.0.0.1
 Makefile             运维命令，`make` 查看
 groups.example.yaml  按群的知识库模板，见下文「按群配置」
 plugins/             自己写的 AstrBot 插件，一个子目录一个插件；猜题是子模块
-scripts/             OneBot 调试、掉线看门狗、宿主机上的三个桥、备份、提交前检查
+scripts/             OneBot 调试、掉线看门狗、宿主机上的四个桥、备份、提交前检查
 data/                不进仓库：AstrBot 的配置、sqlite、插件数据，NapCat 的登录态（NapCat 也挂了 data/astrbot，用来读媒体文件）
 backups/             不进仓库：make backup 的产物
 ```
@@ -183,3 +184,15 @@ bot 管理员（`admins_id`，不是群管理员）在任何一个群里 @bot �
 - 贴多行 prompt 后紧跟的回车有时被 Claude Code 吞掉，桥会在几秒内看它没开始干活就补按回车。
 - 记录在 `data/claude-bridge/bridge.log`。`python3 scripts/claude-bridge.py --test` 起一个只回一句话的 Claude 再关掉，用来确认 herdr 和 claude 能起来。干完的标签页不会自己关，看完手动关。改了 `claude-bridge.py` 要 `launchctl kickstart -k gui/$(id -u)/local.astrbot-napcat.claude-bridge`。
 
+## 女仆桥
+
+bot 管理员（`admins_id`）在任何一个白名单群里 @bot 说「女仆 …」（「委派」「委托」「让女仆」也认），插件 `astrbot_plugin_butler` 把话、群号、管理员 QQ 号、消息号（引用了消息的话连同引用的内容）交给宿主机的 `scripts/butler-bridge.py`（`make butler-bridge-install` 装成 launchd 常驻）。用法见插件的 README。
+
+- 桥把话交给 herdr `astrbot-napcat` 工作区「女仆」标签页里常驻的女仆（herdr 里叫 `butler`）：`claude --dangerously-skip-permissions`，走 DeepSeek（`deepseek-flash`）。没有就先起一个；它在忙时来的话会排队。「女仆 重开」关掉标签页，下次重新起。
+- 走 DeepSeek 靠起女仆时的 `--settings data/butler-bridge/claude-settings.json`（桥每次起之前现写，权限 600，key 取自 AstrBot 主配置里 id 为 `deepseek` 的提供商）。光设 shell 环境变量不行，`~/.claude/settings.json` 的 `env` 会盖掉。用户设置里的 hook 对女仆照样生效。
+- 说话人设在 `data/butler-bridge/persona.md`：让 Sonnet 读了几天群聊总结的（像个话少靠谱的老群友，不是每句都叫主人），带群里的黑话，所以不进仓库；桥起女仆时把规则和人设拼成 `data/butler-bridge/system-prompt.md` 交给她，改了要「女仆 重开」。
+- 女仆的规则在 `scripts/butler-prompt.md`：每件事最后用 `scripts/qq-say.py` 回到原群（话要短，长内容写到 `~/butler-notes/` 或留在标签页）；写代码、搜网页的用 herdr 另开标签页委派给 claude（本机正常登录的）、codex、cursor、grok，名字叫 `butler-<短名>`；推送、删东西、改 GitHub 权限、重启服务、对外发消息、花钱这类先在群里问，等「女仆 确认」。
+- 和清 issue 的桥不同，这个桥交过去的是管理员的原话，女仆权限也全开，所以令牌（`data/astrbot/plugin_data/astrbot_plugin_butler/bridge_token`）泄露等于能操作这台 Mac。桥只听 `127.0.0.1:6193`，插件那头只认 `admins_id`。
+- 替主人触发插件：`scripts/bot-do.py <群号> <主人QQ号> [--reply 消息号] [--no-at] 话`，等于主人在那个群里发了「@bot 话」，猜题、杀炫区等照常响应。宿主机连不进容器，所以反过来：女仆插件在 AstrBot 里一直向桥 `POST /pull` 长轮询，拿到就构造成主人的群消息交给 QQ 适配器（`convert_message` → `handle_msg`，白名单、管理员身份照常），再 `POST /ack` 回报，`bot-do.py` 最多等 20 秒。只认 `admins_id` 里的号；以「女仆 / 管家 / 委派 / 委托」开头的不收，构造的消息也带标记，女仆插件自己不接，免得绕回去。女仆可以自己判断主动触发（比如看群里都在求题就开一局），规则在 `butler-prompt.md`「触发 bot 的插件」。
+- `scripts/qq-say.py <群号> [--at QQ号] [--reply 消息号] 话` 也可以手动用，走 `scripts/onebot.py`，超过 400 字截掉。
+- 记录在 `data/butler-bridge/bridge.log`（只记谁、哪个群、前 80 个字）。`python3 scripts/butler-bridge.py --test` 起一个女仆只回一句话再关掉，确认 DeepSeek 和 herdr 能用。改了 `butler-bridge.py` 要 `launchctl kickstart -k gui/$(id -u)/local.astrbot-napcat.butler-bridge`；改了 `butler-prompt.md` 要「女仆 重开」才生效。

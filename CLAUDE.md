@@ -11,6 +11,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `data/astrbot` 同时挂进 NapCat 的同一路径，NapCat 才读得到 AstrBot 发的图片和语音。
 - 容器访问宿主机用 `192.168.5.2`，不要用 `host.docker.internal`（被 Clash 的假 IP DNS 劫持）。搜烧鸡插件 `astrbot_plugin_xsearch` 就是这样调宿主机上 launchd 常驻的 `scripts/grok-bridge.py`，再由它调本机的 `grok` 命令行，见 `README.md`「搜烧鸡的 grok 桥」。
 - 提issue 插件 `astrbot_plugin_issue` 同样经宿主机 launchd 常驻的 `scripts/gh-bridge.py` 调本机的 `gh`，在猜题仓库建 issue，见 `README.md`「提 issue 的 gh 桥」。bot 管理员 @bot 说「清issue」时，它再经 `scripts/claude-bridge.py`（launchd 常驻）用 herdr 在 `astrbot-napcat` 工作区开个 bypass 模式的 Claude 处理 open 的 issue，见 `README.md`「清 issue 的 Claude 桥」。
+- 女仆插件 `astrbot_plugin_butler`：bot 管理员 @bot 说「女仆 …」，经 `scripts/butler-bridge.py`（launchd 常驻）交给 herdr 里常驻的女仆（用 DeepSeek 跑的 bypass 模式 Claude Code），它在本机干活、委派别的 agent，用 `scripts/qq-say.py` 回群，见 `README.md`「女仆桥」。
 - 线上数据：
   - `data/astrbot/cmd_config.json`：AstrBot 主配置，群白名单在 `platform_settings.id_whitelist`，管理员在 `admins_id`。
   - `data/astrbot/config/astrbot_plugin_guessless_config.json`：猜题插件配置，含 Google Maps key 和 IGDB secret。按群的每小时题数在 `group_hourly_limits`（「群号:题数」，0 不限）。
