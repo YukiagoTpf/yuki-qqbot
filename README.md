@@ -80,7 +80,7 @@ make new-plugin name=astrbot_plugin_foo   # 生成骨架并软链进 AstrBot，�
 | `make stats` | 内存 / CPU 快照 |
 | `make groups` | 列出 bot 所在的群 |
 | `scripts/onebot.py <action> [json]` | 直接调 OneBot action，如 `get_group_member_list` |
-| `make update` | 拉最新镜像并重建（NapCat 固定版本，不跟着升） |
+| `make update` | 拉最新的 AstrBot 镜像并重建（NapCat 上游已删库，不拉，只用本机镜像） |
 | `make watchdog-install` / `make watchdog-uninstall` | 装 / 卸掉线看门狗，见下文 |
 | `make grok-bridge-install` / `make grok-bridge-uninstall` | 装 / 卸搜烧鸡用的 grok 桥，见下文 |
 | `make gh-bridge-install` / `make gh-bridge-uninstall` | 装 / 卸提 issue 用的 gh 桥，见下文 |
@@ -106,7 +106,7 @@ make new-plugin name=astrbot_plugin_foo   # 生成骨架并软链进 AstrBot，�
 
 NapCat 是非官方客户端，腾讯会不定期踢下线或让登录态失效，只能降低概率，见 NapCatQQ 的 #1728、#2071。目前的做法：
 
-- **固定版本**：`compose.yml` 里 NapCat 用 `v4.18.41`，不用 `latest`。社区普遍反映新版更容易被踢，升级要手动改标签。
+- **固定版本**：`compose.yml` 里 NapCat 用 `v4.18.41`，不用 `latest`。社区普遍反映新版更容易被踢，升级要手动改标签。上游已经删库，这个标签拉不到了，见下面「NapCat 上游删库」。
 - **固定设备**：`hostname` 和 MAC 写死成第一次登录时的值。容器重建默认会换新的，QQ 可能当成换了设备。
 - **反检测**：`data/napcat/config/napcat_<QQ号>.json` 里 `bypass` 六项全开，不如实上报运行环境。改了要重启 NapCat。
 - **少发**：猜题群都设了宵禁（00:00–07:00），整点排行榜每 3 小时一次（猜题插件的 `group_curfews`、`board_interval_hours`）。
@@ -124,6 +124,34 @@ NapCat 是非官方客户端，腾讯会不定期踢下线或让登录态失效�
 - 两次自动重启至少隔 2 小时，因为登录太勤本身招风控；隔得近就只发通知。
 - 记录在 `data/watchdog/watchdog.log`。`python3 scripts/napcat-watchdog.py --dry-run` 只打印判断，不动手。
 - 通知是 `osascript` 发的，收不到的话去「系统设置 → 通知」打开「脚本编辑器」。
+
+## NapCat 上游删库（2026-11-12）
+
+2026-11-12 NapCat 官方仓库 `NapNeko/NapCatQQ` 被强推成只剩 README，tag 和 release 都删了。NapNeko 的 NapCat-Docker、Installer、Docs 仓库也都 404，Docker Hub 上的 `mlikiowa/napcat-docker`（包括 `:base`）整个没了。以后 NapCat 要自己维护。
+
+**现状：线上还能用，先不动。**
+
+- 线上跑的是本机已有的镜像 `mlikiowa/napcat-docker:v4.18.41`，里面是 QQ linux 3.2.34-53644 (arm64)，没有热更新，packet 正常。这是现在唯一的一份镜像，`docker compose pull` 拉不到它（`make update` 已改成只拉 AstrBot），`docker image prune -a` 会把它删掉，别跑。
+- 只要腾讯不强制要求更高的 QQ 版本，就一直这么用。腾讯 11-03 已经发了 3.2.35，对我们没有影响。
+
+**备份：**
+
+- 源码：私有仓库 `YukiagoTpf/NapCatQQ`，从社区 fork 镜像来的。main 是删库前最后一个提交 `72912f2`（代码停在 10-30 的 `fix: #2106`），有 45 个分支、761 个 tag（含 v4.18.41、v4.18.42）。Actions 关着，免得推送触发上游的发版流程。
+- Docker 构建脚本：还没备份。社区 fork 还在（fork 网络现在挂在 `Emen-c/NapCat-Docker` 下，较新的是 10-30 的 `fix`）。
+- QQ 安装包：腾讯会删旧版本的 deb（3.2.30 及更早的官方链接都 404 了），3.2.34-53644 的 arm64 deb 已经下载下来了，和线上的 `wrapper.node` 校验一致，但还没放到长期保存的地方。
+
+**下次部署 NapCat 切成自己构建：**
+
+1. 源码构建（已验证能成功，产物和线上 `/app/napcat` 结构一致，`native` 里的二进制逐个一致）：在 node:20 容器里用 **pnpm 9**（新版 pnpm 不认它的 workspace），跑 `pnpm i --frozen-lockfile`、`pnpm --filter napcat-webui-frontend run build`、`pnpm run build:shell`、`pnpm --filter napcat-plugin-builtin run build`，产物在 `packages/napcat-shell/dist`。要设 `NAPCAT_VERSION`，不然它去上游查 tag，查不到就成了 `1.0.0-dev`；产物目录里再 `npm install --omit=dev` 装上 express、ws，然后打包成 `NapCat.Shell.zip`。Colima 默认不挂 `/tmp`，源码放 `/tmp` 的话用 `docker cp` 拷进容器。
+2. 镜像构建：用 NapCat-Docker 的 `base/Dockerfile` 自己构建 base 镜像；`get_artifacts.sh` 从已经删掉的 release 下载 zip，要改成用第 1 步的产物；QQ deb 用自己保存的那份，不依赖腾讯的链接。
+3. 许可证（Limited Redistribution License）不允许公开发布改过的代码，备份仓库和自建镜像都要保持私有。
+4. 运行时不依赖 NapNeko 的服务器，只有 WebUI 的检查更新和插件商店会失效。
+
+**升级 QQ 时要注意：**
+
+- appid / QUA 版本表里没有时，NapCat 会从 QQ 的 major.node 自动解析，不用手动补。
+- `packages/napcat-core/external/packet.json`、`napi2native.json` 里每个 QQ 版本的 send/recv 偏移要逆向 `wrapper.node`，上游是人工找的，仓库里没有工具。缺偏移时 NapCat 照常启动，收发文字、图片、语音不受影响；合并转发、戳一戳、AI 语音会出问题，收到的图片拿链接会退回第三方 rkey 服务器（搜烧鸡用得到）。可以先看社区 fork 有没有人补，或者拿旧版偏移处的机器码当特征去新版里搜。
+- 不到腾讯强制升级就不升。
 
 ## 搜烧鸡的 grok 桥
 
@@ -154,3 +182,4 @@ bot 管理员（`admins_id`，不是群管理员）在任何一个群里 @bot �
 - 监听 `127.0.0.1:6192`。上一个清 issue 的 Claude（herdr 里名字以 `issues-` 开头）还在 working / blocked 就回「上一轮还在清」；没有 open 的 issue 不起，回「现在没有 open 的 issue」。
 - 贴多行 prompt 后紧跟的回车有时被 Claude Code 吞掉，桥会在几秒内看它没开始干活就补按回车。
 - 记录在 `data/claude-bridge/bridge.log`。`python3 scripts/claude-bridge.py --test` 起一个只回一句话的 Claude 再关掉，用来确认 herdr 和 claude 能起来。干完的标签页不会自己关，看完手动关。改了 `claude-bridge.py` 要 `launchctl kickstart -k gui/$(id -u)/local.astrbot-napcat.claude-bridge`。
+

@@ -19,6 +19,10 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
   - `data/astrbot/plugin_data/astrbot_plugin_groupkb/chat/<群号>/<日期>.jsonl`：落盘的群聊（留 14 天），查「当时群里在说什么」、做测试样本用它，比 NapCat 的历史全。
   - 两个配置文件都是 UTF-8 BOM，改的时候保留 BOM；里面有密钥，只读取需要的字段，不要打印整个文件。
 
+## NapCat 上游已删库
+
+2026-11-12 NapCat 官方仓库和 Docker Hub 镜像都没了。线上 NapCat 只剩本机那份 `v4.18.41` 镜像，不要 `docker compose pull`（`make update` 已改成只拉 AstrBot）、`docker image prune -a`。源码备份在私有仓库 `YukiagoTpf/NapCatQQ`，下次部署 NapCat 切成自己构建；现在能用就不动。构建步骤、QQ 版本和偏移的注意事项见 `README.md`「NapCat 上游删库」。
+
 ## 常用命令
 
 | 命令 | 作用 |

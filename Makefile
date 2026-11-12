@@ -39,8 +39,8 @@ link: ## 把 plugins/ 下的插件软链进 AstrBot
 new-plugin: ## 新建插件，name=astrbot_plugin_xxx
 	@scripts/new-plugin.sh $(name)
 
-update: ## 拉最新镜像并重建（NapCat 固定了版本，不跟着升）
-	$(COMPOSE) pull
+update: ## 拉最新的 AstrBot 镜像并重建（NapCat 上游已删库，只用本机镜像，不拉）
+	$(COMPOSE) pull astrbot
 	$(COMPOSE) up -d
 
 backup: ## 停机打包 data/ 到 backups/
