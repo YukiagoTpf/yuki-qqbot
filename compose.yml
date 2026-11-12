@@ -27,6 +27,8 @@ services:
       - "./data/astrbot:/AstrBot/data"
     ports:
       - "127.0.0.1:${NAPCAT_WEBUI_PORT:-6099}:6099"
+      # OneBot 正向 WebSocket（NapCat 网络配置里的 persona），给 Persona 扩展 napcat 在本机连；只绑 127.0.0.1，它能操作这个 QQ 号。
+      - "127.0.0.1:${NAPCAT_ONEBOT_PORT:-3001}:3001"
     networks:
       bot:
         mac_address: "${NAPCAT_MAC:?set NAPCAT_MAC}"
